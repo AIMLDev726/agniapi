@@ -1,0 +1,16 @@
+include README.md
+include LICENSE
+include CHANGELOG.md
+recursive-include src/agniapi *.py
+recursive-include src/agniapi *.pyi
+include src/agniapi/py.typed
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * *.orig
+recursive-exclude * *.rej
+exclude .coverage
+exclude .gitignore
+exclude .pre-commit-config.yaml
+recursive-exclude tests *
+recursive-exclude docs *
+recursive-exclude examples *

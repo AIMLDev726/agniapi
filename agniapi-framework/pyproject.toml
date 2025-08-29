@@ -1,0 +1,202 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agniapi"
+version = "0.1.0"
+description = "A unified REST API framework combining Flask and FastAPI features with built-in MCP support"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "AIMLDev726", email = "aistudentlearn4@gmail.com"}
+]
+maintainers = [
+    {name = "AIMLDev726", email = "aistudentlearn4@gmail.com"}
+]
+keywords = [
+    "api",
+    "rest",
+    "web",
+    "framework",
+    "async",
+    "flask",
+    "fastapi",
+    "mcp",
+    "model-context-protocol"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Framework :: AsyncIO",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "starlette>=0.27.0",
+    "werkzeug>=2.3.0",
+    "pydantic>=2.0.0",
+    "click>=8.0.0",
+    "httpx>=0.24.0",
+    "typing-extensions>=4.0.0",
+]
+
+[project.optional-dependencies]
+mcp = [
+    "mcp>=1.0.0",
+]
+jwt = [
+    "PyJWT>=2.0.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+docs = [
+    "mkdocs>=1.4.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.20.0",
+]
+server = [
+    "uvicorn[standard]>=0.18.0",
+    "gunicorn>=20.0.0",
+]
+all = [
+    "agniapi[mcp,jwt,server]",
+]
+
+[project.urls]
+Homepage = "https://github.com/AIMLDev726/agniapi"
+Documentation = "https://github.com/AIMLDev726/agniapi/blob/main/README.md"
+Repository = "https://github.com/AIMLDev726/agniapi"
+"Bug Tracker" = "https://github.com/AIMLDev726/agniapi/issues"
+Changelog = "https://github.com/AIMLDev726/agniapi/blob/main/CHANGELOG.md"
+
+[project.scripts]
+agniapi = "agniapi.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["agniapi*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.package-data]
+agniapi = ["py.typed"]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["agniapi"]
+src_paths = ["src", "tests"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = [
+    "werkzeug.*",
+    "starlette.*",
+    "uvicorn.*",
+    "mcp.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "asyncio: marks tests as async tests",
+]
+
+[tool.coverage.run]
+source = ["src/agniapi"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "src/agniapi/cli.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+    ".venv",
+    ".tox",
+]

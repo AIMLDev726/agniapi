@@ -1,0 +1,16 @@
+# Core dependencies for AgniAPI
+starlette>=0.27.0
+werkzeug>=2.3.0
+pydantic>=2.0.0
+click>=8.0.0
+httpx>=0.24.0
+typing-extensions>=4.0.0
+
+# Server (optional but recommended)
+uvicorn[standard]>=0.18.0
+
+# Development tools (optional)
+# pytest>=7.0.0
+# black>=23.0.0
+# isort>=5.0.0
+# flake8>=6.0.0
