@@ -5,10 +5,8 @@ Provides test client and testing helpers for both sync and async testing.
 
 from __future__ import annotations
 
-import asyncio
 import json
 from typing import Any, Dict, List, Optional, Union
-from urllib.parse import urlencode
 
 import httpx
 from starlette.testclient import TestClient as StarletteTestClient

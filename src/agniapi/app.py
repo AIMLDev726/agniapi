@@ -7,10 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-import os
-import sys
-import typing as t
-from contextlib import asynccontextmanager
+import logging
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 # Import key components from Flask and FastAPI patterns
@@ -19,8 +16,7 @@ from werkzeug.wrappers import Response as WerkzeugResponse
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.responses import Response as StarletteResponse, JSONResponse as StarletteJSONResponse
-from starlette.routing import BaseRoute
-from starlette.types import ASGIApp, Lifespan, Receive, Scope, Send
+from starlette.types import ASGIApp, Lifespan
 
 from .routing import Router
 from .request import Request
@@ -33,7 +29,7 @@ from .mcp import MCPServer, MCPClient
 from .openapi import OpenAPIGenerator
 from .security import SecurityManager
 from .websockets import WebSocketManager
-from .types import RouteHandler, MiddlewareType, is_async_callable, Scope, Receive, Send
+from .types import RouteHandler, is_async_callable, Scope, Receive, Send
 
 
 class AgniAPI:
@@ -49,7 +45,7 @@ class AgniAPI:
         *,
         title: str = "Agni API",
         description: str = "",
-        version: str = "0.1.0",
+        version: str = "0.1.1",
         debug: bool = False,
         docs_url: Optional[str] = "/docs",
         redoc_url: Optional[str] = "/redoc",
@@ -92,6 +88,7 @@ class AgniAPI:
         self.openapi_url = openapi_url
         self.static_folder = static_folder
         self.template_folder = template_folder
+        self.instance_relative_config = instance_relative_config
         self.root_path = root_path
         
         # Core components
@@ -482,18 +479,26 @@ class AgniAPI:
                         await background_tasks.execute_all()
                     except Exception as bg_error:
                         # Log background task errors but don't affect the response
-                        import logging
                         logging.error(f"Background task execution failed: {bg_error}")
             else:
                 # 404 Not Found - use error handler if available
                 error_handler = self._error_handlers.get(404)
                 if error_handler:
-                    if is_async_callable(error_handler):
-                        result = await error_handler(request, HTTPException(404, "Not Found"))
-                    else:
-                        result = error_handler(request, HTTPException(404, "Not Found"))
+                    try:
+                        if is_async_callable(error_handler):
+                            result = await error_handler(request, HTTPException(404, "Not Found"))
+                        else:
+                            result = error_handler(request, HTTPException(404, "Not Found"))
 
-                    response = self._convert_to_starlette_response(result)
+                        # Ensure result is not a coroutine
+                        if inspect.iscoroutine(result):
+                            result = await result
+
+                        response = self._convert_to_starlette_response(result, 404)
+                    except Exception as handler_error:
+                        # Fallback if error handler fails
+                        logging.error(f"404 error handler failed: {handler_error}")
+                        response = StarletteJSONResponse({"detail": "Not Found"}, status_code=404)
                 else:
                     response = StarletteJSONResponse({"detail": "Not Found"}, status_code=404)
 
@@ -509,9 +514,14 @@ class AgniAPI:
                     else:
                         result = error_handler(request, http_exc)
 
+                    # Ensure result is not a coroutine
+                    if inspect.iscoroutine(result):
+                        result = await result
+
                     response = self._convert_to_starlette_response(result, http_exc.status_code)
-                except Exception:
+                except Exception as handler_error:
                     # Fallback if error handler fails
+                    logging.error(f"HTTP error handler failed: {handler_error}")
                     response = StarletteJSONResponse(
                         {"detail": http_exc.detail},
                         status_code=http_exc.status_code,
@@ -536,9 +546,14 @@ class AgniAPI:
                     else:
                         result = error_handler(request, e)
 
+                    # Ensure result is not a coroutine
+                    if inspect.iscoroutine(result):
+                        result = await result
+
                     response = self._convert_to_starlette_response(result, 500)
-                except Exception:
+                except Exception as handler_error:
                     # Fallback if error handler fails
+                    logging.error(f"Error handler failed: {handler_error}")
                     response = StarletteJSONResponse({"detail": "Internal Server Error"}, status_code=500)
             else:
                 response = StarletteJSONResponse({"detail": "Internal Server Error"}, status_code=500)
@@ -594,13 +609,24 @@ class AgniAPI:
             try:
                 # Execute handler
                 if inspect.iscoroutinefunction(handler):
-                    # Run async handler in event loop
-                    loop = asyncio.new_event_loop()
-                    asyncio.set_event_loop(loop)
+                    # Run async handler in event loop (safely handle existing loop)
                     try:
+                        # Try to get existing event loop
+                        loop = asyncio.get_event_loop()
+                        if loop.is_running():
+                            # If loop is running, we can't use run_until_complete
+                            # This is a limitation of WSGI with async handlers
+                            raise RuntimeError("Cannot run async handler in WSGI context with running event loop")
                         result = loop.run_until_complete(handler(request, **params))
-                    finally:
-                        loop.close()
+                    except RuntimeError:
+                        # No event loop exists, create a new one
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        try:
+                            result = loop.run_until_complete(handler(request, **params))
+                        finally:
+                            loop.close()
+                            asyncio.set_event_loop(None)
                 else:
                     result = handler(request, **params)
 
@@ -651,7 +677,7 @@ class AgniAPI:
             **kwargs
         )
 
-    async def run_async(
+    def run_async(
         self,
         host: str = "127.0.0.1",
         port: int = 8000,
@@ -659,7 +685,7 @@ class AgniAPI:
     ):
         """Run the async server (FastAPI-style)."""
         import uvicorn
-        await uvicorn.run(self, host=host, port=port, **kwargs)
+        uvicorn.run(self, host=host, port=port, **kwargs)
 
     # Configuration
     def config_from_object(self, obj):

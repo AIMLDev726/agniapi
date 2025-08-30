@@ -5,7 +5,6 @@ ASGI-compatible middleware with Flask-style patterns.
 
 from __future__ import annotations
 
-import asyncio
 import time
 from typing import Any, Callable, Dict, List, Optional, Union
 from abc import ABC, abstractmethod

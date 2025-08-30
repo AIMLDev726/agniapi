@@ -3,7 +3,6 @@ Full-featured API example using Agni API framework.
 Demonstrates all major features in a comprehensive application.
 """
 
-import asyncio
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel
@@ -13,7 +12,6 @@ from agniapi.security import HTTPBearer, JWTManager
 from agniapi.middleware import CORSMiddleware, RequestLoggingMiddleware
 from agniapi.websockets import WebSocket, WebSocketDisconnect
 from agniapi.response import JSONResponse, HTMLResponse
-from agniapi.testing import TestClient
 
 
 # Pydantic models

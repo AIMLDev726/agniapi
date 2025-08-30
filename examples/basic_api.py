@@ -50,10 +50,9 @@ next_id = 3
 
 
 # Dependency functions
-async def get_database():
-    """Mock database dependency."""
-    return {"connected": True, "users": users_db}
 
+def get_database():
+    return {"connected": True, "users": users_db}
 
 def get_user_by_id(user_id: int) -> User:
     """Get user by ID or raise 404."""
@@ -158,10 +157,8 @@ async def get_user_profile(user_id: int):
     }
 
 
-# Error handlers
 @app.exception_handler(404)
-async def not_found_handler(request, exc):
-    """Custom 404 handler."""
+def not_found_handler(request, exc):
     return JSONResponse(
         status_code=404,
         content={
@@ -171,10 +168,8 @@ async def not_found_handler(request, exc):
         }
     )
 
-
 @app.exception_handler(400)
-async def bad_request_handler(request, exc):
-    """Custom 400 handler."""
+def bad_request_handler(request, exc):
     return JSONResponse(
         status_code=400,
         content={
@@ -183,6 +178,8 @@ async def bad_request_handler(request, exc):
             "path": request.path
         }
     )
+
+
 
 
 if __name__ == "__main__":

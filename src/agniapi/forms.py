@@ -10,8 +10,6 @@ This module provides comprehensive form handling capabilities including:
 
 from __future__ import annotations
 
-import io
-import tempfile
 from typing import Any, Dict, List, Optional, Union, BinaryIO, AsyncGenerator
 from pathlib import Path
 

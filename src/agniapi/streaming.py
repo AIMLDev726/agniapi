@@ -14,7 +14,6 @@ from __future__ import annotations
 import asyncio
 import json
 import mimetypes
-import os
 from pathlib import Path
 from typing import Any, AsyncGenerator, AsyncIterator, Dict, Generator, Iterator, Optional, Union
 from datetime import datetime

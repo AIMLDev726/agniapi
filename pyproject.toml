@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agniapi"
-version = "0.1.0"
+version = "0.1.1"
 description = "A unified REST API framework combining Flask and FastAPI features with built-in MCP support"
 readme = "README.md"
 license = {text = "MIT"}
@@ -50,15 +50,15 @@ dependencies = [
     "click>=8.0.0",
     "httpx>=0.24.0",
     "typing-extensions>=4.0.0",
+    "uvicorn[standard]>=0.18.0",
+    "mcp>=1.0.0",
+    "PyJWT>=2.0.0",
+    "jinja2>=3.0.0",
+    "python-multipart>=0.0.5",
+    "email-validator>=1.1.0",
 ]
 
 [project.optional-dependencies]
-mcp = [
-    "mcp>=1.0.0",
-]
-jwt = [
-    "PyJWT>=2.0.0",
-]
 dev = [
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
@@ -74,12 +74,11 @@ docs = [
     "mkdocs-material>=9.0.0",
     "mkdocstrings[python]>=0.20.0",
 ]
-server = [
-    "uvicorn[standard]>=0.18.0",
+production = [
     "gunicorn>=20.0.0",
 ]
 all = [
-    "agniapi[mcp,jwt,server]",
+    "agniapi[dev,docs,production]",
 ]
 
 [project.urls]
@@ -87,7 +86,6 @@ Homepage = "https://github.com/AIMLDev726/agniapi"
 Documentation = "https://github.com/AIMLDev726/agniapi/blob/main/README.md"
 Repository = "https://github.com/AIMLDev726/agniapi"
 "Bug Tracker" = "https://github.com/AIMLDev726/agniapi/issues"
-Changelog = "https://github.com/AIMLDev726/agniapi/blob/main/CHANGELOG.md"
 
 [project.scripts]
 agniapi = "agniapi.cli:cli"

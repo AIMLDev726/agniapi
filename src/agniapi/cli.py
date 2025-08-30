@@ -39,12 +39,11 @@ except ImportError:
         return result
 
 from .app import AgniAPI
-from .database import Database, MigrationManager, get_database
-from .config import load_config
+from .database import MigrationManager, get_database
 
 
 @click.group()
-@click.version_option(version="0.1.0", prog_name="agniapi")
+@click.version_option(version="0.1.1", prog_name="agniapi")
 def cli():
     """Agni API - A unified REST API framework with MCP support."""
     pass
@@ -290,7 +289,8 @@ def test(watch: bool, coverage: bool, verbose: bool, path: str):
         if watch:
             # Use pytest-watch if available
             try:
-                import pytest_watch
+                # Check if pytest-watch is available
+                __import__('pytest_watch')
                 cmd = ["ptw"] + cmd[2:]  # Remove python -m
             except ImportError:
                 click.echo("Warning: pytest-watch not installed. Install with: pip install pytest-watch")
@@ -598,56 +598,33 @@ def mcp(app: str, transport: str, host: str, port: int):
         sys.exit(1)
 
 
-@cli.command()
-@click.argument("test_path", default="tests")
-@click.option("--verbose", "-v", is_flag=True, help="Verbose output")
-@click.option("--coverage", "-c", is_flag=True, help="Run with coverage")
-def test(test_path: str, verbose: bool, coverage: bool):
-    """Run tests."""
-    try:
-        import pytest
-        
-        args = [test_path]
-        
-        if verbose:
-            args.append("-v")
-        
-        if coverage:
-            args.extend(["--cov=.", "--cov-report=term-missing"])
-        
-        # Run pytest
-        exit_code = pytest.main(args)
-        sys.exit(exit_code)
-    
-    except ImportError:
-        click.echo("Error: pytest is required for running tests", err=True)
-        click.echo("Install with: pip install pytest", err=True)
-        if coverage:
-            click.echo("For coverage: pip install pytest-cov", err=True)
-        sys.exit(1)
 
 
 def _create_project_files(project_path: Path, name: str, template: str):
     """Create project files based on template."""
-    
+
+    # Sanitize user input to prevent code injection
+    safe_name = name.replace('"', '\\"').replace("'", "\\'").replace("{", "{{").replace("}", "}}")
+    safe_title = safe_name.title().replace('"', '\\"')
+
     # Create main application file
     main_py = f'''"""
-{name} - Agni API application
+{safe_name} - Agni API application
 """
 
 from agniapi import AgniAPI, JSONResponse
 
 app = AgniAPI(
-    title="{name.title()}",
+    title="{safe_title}",
     description="A new Agni API application",
-    version="0.1.0"
+    version="0.1.1"
 )
 
 
 @app.get("/")
 async def root():
     """Root endpoint."""
-    return JSONResponse({{"message": "Hello from {name}!"}})
+    return JSONResponse({{"message": "Hello from {safe_name}!"}})
 
 
 @app.get("/health")
@@ -663,7 +640,7 @@ if __name__ == "__main__":
     (project_path / "main.py").write_text(main_py)
     
     # Create requirements.txt
-    requirements = '''agniapi>=0.1.0
+    requirements = '''agniapi>=0.1.1
 uvicorn[standard]>=0.18.0
 '''
     

@@ -11,7 +11,8 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from enum import Enum
 
 from starlette.websockets import WebSocket as StarletteWebSocket
-from starlette.websockets import WebSocketDisconnect, WebSocketState
+from starlette.websockets import WebSocketDisconnect
+from starlette.websockets import WebSocketState as StarletteWebSocketState
 
 from .exceptions import WebSocketException
 from .types import is_async_callable

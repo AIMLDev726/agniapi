@@ -8,7 +8,6 @@ from __future__ import annotations
 import asyncio
 import json
 from typing import Any, Dict, List, Optional, Union
-from contextlib import asynccontextmanager
 
 # Import MCP SDK components
 try:
@@ -47,13 +46,8 @@ class MCPClient:
         self._mcp_available = MCP_AVAILABLE
 
         if not MCP_AVAILABLE:
-            # Log warning but don't raise exception - allow graceful degradation
-            import warnings
-            warnings.warn(
-                "MCP SDK not available. MCP client functionality will be disabled. "
-                "Install with: pip install mcp",
-                UserWarning
-            )
+            # MCP not available - graceful degradation without warnings
+            pass
     
     async def connect_stdio(
         self,

@@ -7,8 +7,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from agniapi import AgniAPI, Blueprint, HTTPException, Depends
-from agniapi.security import HTTPBearer, JWTManager
-from agniapi.response import JSONResponse
+from agniapi.security import HTTPBearer
 
 
 # Pydantic models

@@ -6,14 +6,11 @@ from __future__ import annotations
 
 import inspect
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Protocol, Union
-from typing_extensions import ParamSpec, TypeVar
 
 from .request import Request
 from .response import Response, ResponseType
 
-# Type variables
-P = ParamSpec("P")
-T = TypeVar("T")
+# Type variables (removed unused P and T)
 
 # Basic type aliases
 ASGIApp = Callable[[Dict[str, Any], Callable, Callable], Awaitable[None]]
@@ -218,11 +215,11 @@ class UploadFile:
                 self.file.close()
 
 
-class WebSocketState:
+class WebSocketConnectionState:
     """
     Represents the state of a WebSocket connection.
     """
-    
+
     def __init__(self):
         self.connected = False
         self.client_state = "CONNECTING"

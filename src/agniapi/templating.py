@@ -3,7 +3,6 @@ Template engine support for Agni API framework.
 Supports Jinja2 templates with Flask-like interface.
 """
 
-import os
 from typing import Any, Dict, Optional
 
 try:

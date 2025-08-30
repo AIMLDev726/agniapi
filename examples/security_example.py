@@ -13,7 +13,6 @@ from agniapi.security import (
     JWTManager, PasswordHasher, generate_api_key
 )
 from agniapi.response import JSONResponse
-from agniapi.testing import TestClient
 
 
 # Pydantic models
